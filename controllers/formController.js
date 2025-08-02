@@ -1,4 +1,4 @@
-// controllers/formController.js
+
 const Form = require('../models/Form');
 const Project = require('../models/Project');
 const User = require('../models/User');
@@ -18,9 +18,9 @@ const createForm = async (req, res) => {
             project // FIXED: Changed from projectId to project
         } = req.body;
 
-        console.log('Creating form with project:', project); // Debug log
+        console.log('Creating form with project:', project);
 
-        // Ensure 'pages' array always has at least one default page if not provided or empty
+       
         const defaultPages = (pages && Array.isArray(pages) && pages.length > 0) ? pages : [
             {
                 id: 'page-1',
@@ -31,7 +31,7 @@ const createForm = async (req, res) => {
             }
         ];
 
-        // Ensure other complex fields have sensible defaults
+        
         const defaultQuestions = questions && Array.isArray(questions) ? questions : [];
         const defaultDesign = design || { backgroundColor: "#b6b6b6", sectionColor: "#b6b6b6", theme: "light" };
         const defaultConditionalLogic = conditionalLogic || { conditions: [], passRedirect: null, failRedirect: null };
@@ -49,10 +49,10 @@ const createForm = async (req, res) => {
             defaultRedirect: defaultDefaultRedirect,
             status: defaultStatus,
             creator: req.user.id,
-            project: project || null // FIXED: Use project || null
+            project: project || null
         });
 
-        // IMPORTANT: Add form to project's forms array if project is specified
+       
         if (project) {
             try {
                 await Project.findByIdAndUpdate(
@@ -85,7 +85,7 @@ const saveFormDraft = async (req, res) => {
         const { id } = req.params;
         const updates = req.body;
         
-        console.log('Saving draft with project:', updates.project); // Debug log
+        console.log('Saving draft with project:', updates.project); 
         
         if (updates.conditionalLogic) {
             const { validateConditionalLogic } = require('../utils/conditionalLogic');
@@ -99,7 +99,7 @@ const saveFormDraft = async (req, res) => {
             }
         }
 
-        // Get current form to check project changes
+        
         const currentForm = await Form.findById(id);
         if (!currentForm) {
             return res.status(404).json({
@@ -121,13 +121,13 @@ const saveFormDraft = async (req, res) => {
             });
         }
 
-        // IMPORTANT: Handle project association changes
+       
         const oldProject = currentForm.project?.toString();
         const newProject = updates.project;
 
         if (oldProject !== newProject) {
             try {
-                // Remove from old project if it existed
+             
                 if (oldProject) {
                     await Project.findByIdAndUpdate(
                         oldProject,
@@ -136,7 +136,7 @@ const saveFormDraft = async (req, res) => {
                     console.log(`Form ${form._id} removed from project ${oldProject}`);
                 }
                 
-                // Add to new project if specified
+           
                 if (newProject) {
                     await Project.findByIdAndUpdate(
                         newProject,
@@ -168,21 +168,21 @@ const publishForm = async (req, res) => {
         const { id } = req.params;
         const { visibility, accessControl, project } = req.body;
 
-        console.log('Publishing form with project:', project); // Debug log
+        console.log('Publishing form with project:', project);
 
-        // NEW: User validation for restricted visibility
+       
         if (visibility === 'restricted' && accessControl && accessControl.length > 0) {
             const invalidEmails = [];
             const validatedAccessControl = [];
 
             for (const access of accessControl) {
-                // Check if user exists in database
+                
                 const existingUser = await User.findOne({ email: access.email });
                 
                 if (!existingUser) {
                     invalidEmails.push(access.email);
                 } else {
-                    // Add validated user data to access control
+                    
                     validatedAccessControl.push({
                         email: access.email,
                         userId: existingUser._id,
@@ -193,7 +193,7 @@ const publishForm = async (req, res) => {
                 }
             }
 
-            // If any email is not registered, return error
+            
             if (invalidEmails.length > 0) {
                 return res.status(400).json({
                     success: false,
@@ -210,7 +210,7 @@ const publishForm = async (req, res) => {
                     publishedAt: new Date(),
                     visibility,
                     accessControl: validatedAccessControl,
-                    project: project || null // FIXED: Use project || null
+                    project: project || null 
                 },
                 { new: true, runValidators: true }
             ).populate('creator', 'name email').populate('project', 'name color');
@@ -222,7 +222,7 @@ const publishForm = async (req, res) => {
                 });
             }
 
-            // IMPORTANT: Ensure form is in project's forms array
+          
             if (project) {
                 try {
                     const projectDoc = await Project.findById(project);
@@ -244,15 +244,15 @@ const publishForm = async (req, res) => {
                 form
             });
         } else {
-            // Handle public forms or forms without access control
+            
             const form = await Form.findOneAndUpdate(
                 { _id: id, creator: req.user.id },
                 {
                     status: 'published',
                     publishedAt: new Date(),
                     visibility,
-                    accessControl: [], // Empty for public forms
-                    project: project || null // FIXED: Use project || null
+                    accessControl: [],
+                    project: project || null 
                 },
                 { new: true, runValidators: true }
             ).populate('creator', 'name email').populate('project', 'name color');
@@ -264,7 +264,7 @@ const publishForm = async (req, res) => {
                 });
             }
 
-            // IMPORTANT: Ensure form is in project's forms array
+         
             if (project) {
                 try {
                     const projectDoc = await Project.findById(project);
@@ -295,7 +295,6 @@ const publishForm = async (req, res) => {
     }
 };
 
-// Keep all your other functions as they are...
 const getUserForms = async (req, res) => {
     try {
         const { status, page = 1, limit = 10 } = req.query;
@@ -500,10 +499,10 @@ const duplicateForm = async (req, res) => {
             design: originalForm.design,
             conditionalLogic: originalForm.conditionalLogic,
             status: 'draft',
-            project: originalForm.project || null // FIXED: Use || null
+            project: originalForm.project || null 
         });
         
-        // Add to project if project exists
+
         if (duplicatedForm.project) {
             await Project.findByIdAndUpdate(
                 duplicatedForm.project,
@@ -599,8 +598,6 @@ const getFormShareLink = async (req, res) => {
           message: 'Form not found'
         });
       }
-  
-      // Check if user owns the form or has share permission
       if (form.creator.toString() !== req.user.id && 
           !form.accessControl?.some(ac => ac.userId.toString() === req.user.id && 
           ['edit', 'share'].includes(ac.level))) {
@@ -610,7 +607,6 @@ const getFormShareLink = async (req, res) => {
         });
       }
   
-      // Generate share URL (public form link)
       const shareUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/form/${form._id}`;
       
       res.status(200).json({
@@ -629,7 +625,7 @@ const getFormShareLink = async (req, res) => {
     }
   };
   
-  // 🆕 ADD THIS FUNCTION - Update form (for rename functionality)
+
   const updateForm = async (req, res) => {
     try {
       const form = await Form.findById(req.params.id);
@@ -641,7 +637,7 @@ const getFormShareLink = async (req, res) => {
         });
       }
   
-      // Check if user owns the form or has edit permission
+
       if (form.creator.toString() !== req.user.id && 
           !form.accessControl?.some(ac => ac.userId.toString() === req.user.id && ac.level === 'edit')) {
         return res.status(403).json({
@@ -649,8 +645,6 @@ const getFormShareLink = async (req, res) => {
           message: 'Not authorized to update this form'
         });
       }
-  
-      // Handle project association changes if project is being updated
       const oldProject = form.project?.toString();
       const newProject = req.body.project;
   
@@ -661,10 +655,8 @@ const getFormShareLink = async (req, res) => {
         { new: true, runValidators: true }
       ).populate('creator', 'name email').populate('project', 'name color');
   
-      // Update project associations if project changed
       if (oldProject !== newProject) {
         try {
-          // Remove from old project if it existed
           if (oldProject) {
             await Project.findByIdAndUpdate(
               oldProject,

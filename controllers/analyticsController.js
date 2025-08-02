@@ -2,11 +2,9 @@ const Form = require('../models/Form');
 const Project = require('../models/Project');
 const Response = require('../models/Response');
 
-// Existing function (if you have it)
 const getViewsAnalytics = async (req, res) => {
-    // Your existing views analytics logic
     try {
-        // Implementation for views analytics
+        
         res.json({
             success: true,
             totalViews: 0,
@@ -21,27 +19,24 @@ const getViewsAnalytics = async (req, res) => {
 };
 
 
-// controllers/analyticsController.js
 const getFormAnalytics = async (req, res) => {
     try {
         const { formId } = req.params;
-        
-        console.log('=== FORM ANALYTICS DEBUG ===');
         console.log('Requested Form ID:', formId);
         
         // Get form with details
         const form = await Form.findById(formId).populate('creator', 'name email');
         if (!form) {
-            console.log('❌ Form not found');
+            console.log('Form not found');
             return res.status(404).json({ success: false, message: 'Form not found' });
         }
 
-        console.log('✅ Form found:', form.title);
-        console.log('📝 Form questions count:', form.questions?.length);
+        console.log('Form found:', form.title);
+        console.log('Form questions count:', form.questions?.length);
         
         // Debug form questions structure
         if (form.questions && form.questions.length > 0) {
-            console.log('📋 Form questions:');
+            console.log('Form questions:');
             form.questions.forEach((question, index) => {
                 console.log(`  ${index + 1}. ID: ${question.id}, Type: ${question.type}, Title: "${question.title}"`);
                 if (question.options && question.options.length > 0) {
@@ -49,15 +44,15 @@ const getFormAnalytics = async (req, res) => {
                 }
             });
         } else {
-            console.log('⚠️ No questions found in form');
+            console.log('No questions found in form');
         }
 
         // Get all responses for this form
         const responses = await Response.find({ form: formId });
-        console.log('📊 Responses found:', responses.length);
+        console.log('Responses found:', responses.length);
         
         if (responses.length > 0) {
-            console.log('💭 Sample response structure:');
+            console.log('Sample response structure:');
             responses.forEach((response, index) => {
                 console.log(`  Response ${index + 1}:`);
                 response.answers.forEach(answer => {
@@ -73,11 +68,11 @@ const getFormAnalytics = async (req, res) => {
         const chartableQuestions = form.questions.filter(q => 
             ['multiple-choice', 'dropdown', 'checkbox'].includes(q.type)
         );
-        console.log('📈 Chartable questions:', chartableQuestions.length);
+        console.log('Chartable questions:', chartableQuestions.length);
         
         // Process each chartable question
         chartableQuestions.forEach(question => {
-            console.log(`\n🔍 Processing question: ${question.id} (${question.type})`);
+            console.log(`\n Processing question: ${question.id} (${question.type})`);
             
             // Extract responses for this specific question
             const questionResponses = responses
@@ -127,19 +122,18 @@ const getFormAnalytics = async (req, res) => {
                     });
                 });
             } else {
-                console.log('   ⚠️ No options found for this question');
+                console.log('  No options found for this question');
             }
 
             if (questionResponses.length > 0 || analytics.options.length > 0) {
                 questionAnalytics.push(analytics);
-                console.log(`   ✅ Added question to analytics`);
+                console.log(`Added question to analytics`);
             } else {
-                console.log(`   ⚠️ Skipped question (no responses or options)`);
+                console.log(`Skipped question (no responses or options)`);
             }
         });
 
-        console.log(`\n📈 Final analytics: ${questionAnalytics.length} questions processed`);
-        console.log('=== END DEBUG ===\n');
+        console.log(`\nFinal analytics: ${questionAnalytics.length} questions processed`);
 
         res.json({
             success: true,
@@ -154,7 +148,7 @@ const getFormAnalytics = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Error fetching form analytics:', error);
+        console.error('Error fetching form analytics:', error);
         res.status(500).json({ success: false, message: 'Server error' });
     }
 };
@@ -195,7 +189,7 @@ const getProjectAnalytics = async (req, res) => {
                 totalViews,
                 averageViews,
                 viewsGrowth,
-                chartData: [] // Add your chart data here if needed
+                chartData: []
             },
             forms
         });

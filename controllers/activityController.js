@@ -19,10 +19,8 @@ const getRecentActivity = async (req, res) => {
       .limit(10)
       .select('name createdAt updatedAt');
 
-    // Combine and format activities
     const activities = [];
 
-    // Add form activities
     recentForms.forEach(form => {
       if (form.publishedAt) {
         activities.push({
@@ -60,7 +58,6 @@ const getRecentActivity = async (req, res) => {
       });
     });
 
-    // Sort by timestamp and limit
     const sortedActivities = activities
       .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
       .slice(0, limit);

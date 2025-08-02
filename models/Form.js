@@ -1,4 +1,4 @@
-// models/Form.js
+
 const mongoose = require('mongoose');
 
 const dateSettingsSchema = new mongoose.Schema({
@@ -94,7 +94,6 @@ const pageSchema = new mongoose.Schema({
     conditionalLogic: pageLogicSchema
 });
 
-// NEW: View tracking schema for analytics
 const viewHistorySchema = new mongoose.Schema({
     timestamp: {
         type: Date,
@@ -103,7 +102,7 @@ const viewHistorySchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        default: null // For anonymous users
+        default: null
     },
     ipAddress: {
         type: String
@@ -134,14 +133,14 @@ const formSchema = new mongoose.Schema({
     publishedAt: { type: Date, default: null },
     project: { type: mongoose.Schema.Types.ObjectId, ref: 'Project', default: null },
     
-    // NEW: Analytics tracking fields
+   
     viewCount: {
         type: Number,
         default: 0
     },
     viewHistory: [viewHistorySchema],
     
-    // NEW: Additional analytics fields
+
     lastViewed: {
         type: Date,
         default: null

@@ -1,4 +1,4 @@
-// routes/forms.js
+
 const express = require('express');
 const {
   createForm,
@@ -23,9 +23,8 @@ router.post('/', auth, createForm);
 router.put('/:id/draft', auth, saveFormDraft);
 router.put('/:id/publish', auth, publishForm);
 
-// 🆕 ADD THESE TWO NEW ROUTES
-router.put('/:id', auth, updateForm);           // For rename functionality
-router.get('/:id/share-link', auth, getFormShareLink); // For share functionality
+router.put('/:id', auth, updateForm);
+router.get('/:id/share-link', auth, getFormShareLink);
 
 router.get('/my-forms', auth, getUserForms);
 router.get('/shared', auth, getSharedForms);

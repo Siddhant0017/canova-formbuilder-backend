@@ -71,7 +71,6 @@ const getProjectById = async (req, res) => {
       });
     }
 
-    // Check access permissions
     const isCreator = project.creator._id.toString() === req.user.id;
     const isCollaborator = project.collaborators.some(
       collab => collab.userId._id.toString() === req.user.id
@@ -146,7 +145,6 @@ const deleteProject = async (req, res) => {
       });
     }
 
-    // Update all forms in this project to remove project reference
     await Form.updateMany(
       { project: id },
       { $unset: { project: 1 } }
@@ -167,13 +165,13 @@ const getProjectForms = async (req, res) => {
   try {
     const { projectId } = req.params;
     
-    // Verify project exists and user has access
+    
     const project = await Project.findById(projectId);
     if (!project) {
       return res.status(404).json({ success: false, message: 'Project not found' });
     }
     
-    // Check if user is creator or collaborator
+   
     const userId = req.user.id;
     const isCreator = project.creator.toString() === userId;
     const isCollaborator = project.collaborators.some(c => 
@@ -184,7 +182,7 @@ const getProjectForms = async (req, res) => {
       return res.status(403).json({ success: false, message: 'Access denied' });
     }
     
-    // Get forms associated with this project
+    
     const forms = await Form.find({ project: projectId })
                             .populate('creator', 'name email')
                             .sort({ updatedAt: -1 });
@@ -215,7 +213,7 @@ const getProjectShareLink = async (req, res) => {
       });
     }
 
-    // Check if user owns the project or is a collaborator
+   
     const isCreator = project.creator.toString() === req.user.id;
     const isCollaborator = project.collaborators.some(
       collab => collab.userId && collab.userId.toString() === req.user.id
@@ -228,7 +226,7 @@ const getProjectShareLink = async (req, res) => {
       });
     }
 
-    // Generate share URL
+    
     const shareUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/project/${project._id}`;
     
     res.status(200).json({
@@ -247,7 +245,7 @@ const getProjectShareLink = async (req, res) => {
   }
 };
 
-// 🆕 ADD THIS FUNCTION - Duplicate/Copy project
+
 const duplicateProject = async (req, res) => {
   try {
     const originalProject = await Project.findById(req.params.id);
@@ -259,7 +257,7 @@ const duplicateProject = async (req, res) => {
       });
     }
 
-    // Check if user owns the project (only creators can duplicate)
+    
     if (originalProject.creator.toString() !== req.user.id) {
       return res.status(403).json({
         success: false,
@@ -267,20 +265,20 @@ const duplicateProject = async (req, res) => {
       });
     }
 
-    // Create duplicate project
+   
     const duplicateData = {
       name: `${originalProject.name} (Copy)`,
       description: originalProject.description,
       color: originalProject.color,
       creator: req.user.id,
       isArchived: false,
-      collaborators: [] // Don't copy collaborators
+      collaborators: [] 
     };
 
     const duplicatedProject = await Project.create(duplicateData);
     await duplicatedProject.populate('creator', 'name email');
 
-    // Also duplicate all forms in the project
+ 
     const projectForms = await Form.find({ project: originalProject._id });
     const duplicatedForms = [];
 
@@ -296,15 +294,15 @@ const duplicateProject = async (req, res) => {
         creator: req.user.id,
         project: duplicatedProject._id,
         status: 'draft',
-        visibility: 'public', // Reset to public
-        accessControl: [] // Reset access control
+        visibility: 'public',
+        accessControl: []
       };
 
       const duplicatedForm = await Form.create(duplicateFormData);
       duplicatedForms.push(duplicatedForm._id);
     }
 
-    // Update project with forms array
+    
     duplicatedProject.forms = duplicatedForms;
     await duplicatedProject.save();
 

@@ -1,15 +1,15 @@
-// server.js - CORRECTED VERSION
-const express   = require('express');
-const mongoose  = require('mongoose');
-const cors      = require('cors');
+
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
 require('dotenv').config();
 
 const passwordRecoveryRoutes = require('./routes/passwordRecovery');
-const authRoutes             = require('./routes/auth');
-const formRoutes             = require('./routes/forms');
-const projectRoutes          = require('./routes/projects');
-const activityRoutes         = require('./routes/activity');
-const analyticsRoutes        = require('./routes/analytics');
+const authRoutes = require('./routes/auth');
+const formRoutes = require('./routes/forms');
+const projectRoutes = require('./routes/projects');
+const activityRoutes = require('./routes/activity');
+const analyticsRoutes = require('./routes/analytics');
 
 const app = express();
 
@@ -29,8 +29,8 @@ app.use((req, _, next) => {
 
 // Routes
 app.use('/api/password', passwordRecoveryRoutes);
-app.use('/api/auth',     authRoutes);
-app.use('/api/forms',    formRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/forms', formRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/activity', activityRoutes);
 app.use('/api/analytics', analyticsRoutes);
@@ -44,7 +44,6 @@ app.get('/api/health', (_req, res) => {
   });
 });
 
-// ✅ FIXED: Named wildcard parameter
 app.use('/*catchall', (_req, res) => {
   res.status(404).json({ success: false, message: 'Route not found' });
 });
@@ -54,8 +53,8 @@ app.use((err, req, res, _next) => {
   console.error('🚨  EXPRESS ERROR:', err);
   res.status(err.status || 500).json({
     success: false,
-    message: process.env.NODE_ENV === 'production' 
-      ? 'Something went wrong!' 
+    message: process.env.NODE_ENV === 'production'
+      ? 'Something went wrong!'
       : err.message,
     error: process.env.NODE_ENV === 'development' ? err.stack : undefined
   });
@@ -69,10 +68,6 @@ mongoose
     const PORT = process.env.PORT || 5000;
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT} (${process.env.NODE_ENV})`);
-      console.log('Available password-recovery routes:');
-      console.log('  POST /api/password/forgot-password');
-      console.log('  POST /api/password/verify-otp');
-      console.log('  POST /api/password/reset-password');
     });
   })
   .catch((err) => {

@@ -1,11 +1,9 @@
-// controllers/passwordRecoveryController.js
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const emailService = require('../services/emailService');
 const forgotPassword = async (req, res) => {
   try {
-    console.log('=== FORGOT PASSWORD REQUEST ===');
     console.log('Request body:', req.body);
     
     const { email } = req.body;
@@ -32,17 +30,14 @@ const forgotPassword = async (req, res) => {
 
     console.log('User found:', user.email);
 
-    // Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     console.log(`Generated OTP for ${email}: ${otp}`);
     
-    // Hash OTP before storing
     const salt = await bcrypt.genSalt(10);
     const hashedOTP = await bcrypt.hash(otp, salt);
 
-    // Store hashed OTP and expiry in user document
     user.resetPasswordOTP = hashedOTP;
-    user.resetPasswordExpire = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    user.resetPasswordExpire = new Date(Date.now() + 10 * 60 * 1000); 
     await user.save();
 
     console.log('OTP saved to database with expiry');
@@ -68,7 +63,6 @@ const forgotPassword = async (req, res) => {
   }
 };
 
-// Step 2: Verify OTP and issue reset token
 const verifyOTP = async (req, res) => {
   try {
     const { email, otp } = req.body;
@@ -80,7 +74,7 @@ const verifyOTP = async (req, res) => {
       });
     }
 
-    // Find user
+
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({
@@ -89,7 +83,6 @@ const verifyOTP = async (req, res) => {
       });
     }
 
-    // Check if OTP exists and hasn't expired
     if (!user.resetPasswordOTP || !user.resetPasswordExpire) {
       return res.status(400).json({
         success: false,
@@ -98,7 +91,6 @@ const verifyOTP = async (req, res) => {
     }
 
     if (new Date() > user.resetPasswordExpire) {
-      // Clear expired OTP
       user.resetPasswordOTP = undefined;
       user.resetPasswordExpire = undefined;
       await user.save();
@@ -118,7 +110,6 @@ const verifyOTP = async (req, res) => {
       });
     }
 
-    // Generate temporary JWT token for password reset (15 minutes validity)
     const resetToken = jwt.sign(
       { userId: user._id, purpose: 'password-reset' },
       process.env.JWT_SECRET,
@@ -148,7 +139,7 @@ const resetPassword = async (req, res) => {
   try {
     const { resetToken, newPassword, confirmPassword } = req.body;
 
-    // -------- validation --------
+    
     if (!resetToken || !newPassword || !confirmPassword) {
       return res.status(400).json({ success: false, message: 'Reset token, new password, and confirm password are required' });
     }
@@ -159,7 +150,6 @@ const resetPassword = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Password must be at least 6 characters long' });
     }
 
-    // -------- verify reset token --------
     let decoded;
     try {
       decoded = jwt.verify(resetToken, process.env.JWT_SECRET);
@@ -170,7 +160,7 @@ const resetPassword = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid reset token' });
     }
 
-    // -------- find user --------
+
     const user = await User.findById(decoded.userId);
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });

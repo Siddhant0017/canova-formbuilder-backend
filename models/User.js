@@ -23,7 +23,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null
   },
-  resetPasswordExpire: {  // ✅ CHANGED: Removed the 's' to match controller
+  resetPasswordExpire: {
     type: Date,
     default: null
   },

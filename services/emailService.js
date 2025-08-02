@@ -12,16 +12,16 @@ class emailService {
     console.log('EMAIL_APP_PASSWORD present:', !!process.env.EMAIL_APP_PASSWORD);
     
     return nodemailer.createTransport({
-      service: 'gmail',  // Use service instead of host for Gmail
+      service: 'gmail', 
       host: 'smtp.gmail.com',
       port: 587,
-      secure: false, // true for 465, false for other ports
+      secure: false,
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_APP_PASSWORD
       },
       tls: {
-        rejectUnauthorized: false // For development only
+        rejectUnauthorized: false
       }
     });
   }
@@ -105,10 +105,10 @@ class emailService {
     try {
       console.log('🔍 Testing Gmail connection...');
       await this.transporter.verify();
-      console.log('✅ Gmail is ready to send emails!');
+      console.log('Gmail is ready to send emails!');
       return true;
     } catch (error) {
-      console.error('❌ Gmail connection failed:', error);
+      console.error('Gmail connection failed:', error);
       console.error('Error details:', error.message);
       return false;
     }

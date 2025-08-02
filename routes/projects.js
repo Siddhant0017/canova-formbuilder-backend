@@ -19,7 +19,6 @@ router.get('/:id', auth, getProjectById);
 router.put('/:id', auth, updateProject);
 router.delete('/:id', auth, deleteProject);
 
-// 🆕 ADD THESE TWO NEW ROUTES FOR WORKMENU
 router.get('/:id/share-link', auth, getProjectShareLink); // For share functionality
 router.post('/:id/duplicate', auth, duplicateProject);    // For copy functionality
 
